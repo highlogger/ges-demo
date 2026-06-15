@@ -1,0 +1,194 @@
+// ============================================================
+// GES SOLAR PRO — Prisma Schema
+// PostgreSQL — Kurumsal GES Firması Backend
+// ============================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ADMIN KULLANICI
+// ============================================================
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String
+  role          String    @default("admin") // admin | editor
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions Session[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// PROJELER (GES Projeleri)
+// ============================================================
+model Project {
+  id          String    @id @default(uuid())
+  title       String
+  slug        String    @unique
+  description String    @db.Text
+  capacity    String    // "25 MW"
+  location    String    // "Konya, Türkiye"
+  area        String    // "350.000 m²"
+  year        String    // "2024"
+  category    String    // "Arazi GES" | "Çatı GES"
+  coverImage  String?   @db.Text
+  images      String[]  @default([]) // JSON array of image URLs
+  featured    Boolean   @default(false)
+  published   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ============================================================
+// BLOG YAZILARI
+// ============================================================
+model BlogPost {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  excerpt     String   @db.Text
+  content     String   @db.Text // HTML from TipTap
+  coverImage  String?  @db.Text
+  category    String   // "Mevzuat" | "Teknik" | "Sürdürülebilirlik" | "Finans"
+  readTime    String   @default("5 dk")
+  author      String   @default("SolarTech Enerji")
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// HİZMETLER
+// ============================================================
+model Service {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  subtitle    String
+  description String   @db.Text
+  capacity    String   // "1 MW - 100 MW+"
+  features    String[] @default([])
+  icon        String   @default("⚡")
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// REFERANSLAR / MÜŞTERİ YORUMLARI
+// ============================================================
+model Reference {
+  id        String   @id @default(uuid())
+  quote     String   @db.Text
+  author    String
+  role      String   // "Genel Müdür"
+  company   String
+  capacity  String   // "4.2 MW Çatı GES"
+  avatar    String?  @db.Text
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// MÜŞTERİ LOGOLARI
+// ============================================================
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  logoUrl   String?  @db.Text
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// İLETİŞİM FORMU MESAJLARI
+// ============================================================
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  service   String?  // İlgili hizmet
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  isReplied Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// SİTE AYARLARI (White-Label)
+// ============================================================
+model SiteConfig {
+  id          String @id @default("default") // Tek kayıt
+  name        String @default("SolarTech Enerji")
+  shortName   String @default("SolarTech")
+  tagline     String @default("Enerjinizi Güneşten Alın")
+  description String @default("") @db.Text
+  logoUrl     String?
+  faviconUrl  String?
+
+  // İletişim
+  email       String?
+  phone       String?
+  phoneDisplay String?
+  addressTr   String?  @db.Text
+  addressEn   String?  @db.Text
+  googleMaps  String?
+  whatsapp    String?
+
+  // Sosyal medya
+  linkedin    String?
+  instagram   String?
+  twitter     String?
+  youtube     String?
+  facebook    String?
+
+  // İstatistikler (ana sayfa)
+  installedCapacity String @default("150 MW")
+  totalProjects     Int    @default(247)
+  carbonReduction   String @default("250.000 ton")
+  yearsExperience   Int    @default(10)
+  happyCustomers    Int    @default(180)
+
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// MEDYA / DOSYALAR
+// ============================================================
+model Media {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String   @db.Text
+  mimeType  String
+  size      Int      // bytes
+  width     Int?
+  height    Int?
+  alt       String?
+  createdAt DateTime @default(now())
+}

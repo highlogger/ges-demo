@@ -1,0 +1,61 @@
+# ============================================================
+# GES SOLAR PRO — Docker Compose
+# PostgreSQL 16 + Meilisearch + Redis
+# ============================================================
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ges_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-ges_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ges_secure_password_2026}
+      POSTGRES_DB: ${DB_NAME:-ges_solar_db}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ges_admin} -d ${DB_NAME:-ges_solar_db}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    container_name: ges_meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-ges_meili_master_key_2026}
+      MEILI_ENV: ${MEILI_ENV:-development}
+    ports:
+      - '${MEILI_PORT:-7700}:7700'
+    volumes:
+      - meili_data:/meili_data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:7700/health']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: ges_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-ges_redis_password_2026}
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  meili_data:
+  redis_data:
