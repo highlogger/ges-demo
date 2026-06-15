@@ -3,6 +3,7 @@
 // ============================================================
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/shared/image-upload';
 import { createProject } from '@/lib/actions';
 import Link from 'next/link';
 
@@ -48,8 +49,7 @@ export default function NewProjectPage() {
               <input id="year" name="year" className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:ring-2 focus:ring-solar-500/20 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0" placeholder="2026" />
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="coverImage" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Kapak Görseli URL</label>
-              <input id="coverImage" name="coverImage" className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:ring-2 focus:ring-solar-500/20 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0" placeholder="/uploads/proje.jpg" />
+              <ImageUpload name="coverImage" label="Kapak Görseli" />
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="description" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Açıklama *</label>

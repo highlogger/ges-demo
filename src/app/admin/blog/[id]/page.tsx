@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/shared/image-upload';
 import { updateBlogPost } from '@/lib/actions';
 import Link from 'next/link';
 
@@ -30,6 +31,10 @@ export default async function EditBlogPostPage({ params }: Props) {
               <input id="title" name="title" defaultValue={post.title} required className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:ring-2 focus:ring-solar-500/20 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0" />
             </div>
             <div>
+              <label htmlFor="slug" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Slug</label>
+              <input id="slug" name="slug" defaultValue={post.slug} className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:ring-2 focus:ring-solar-500/20 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0" />
+            </div>
+            <div>
               <label htmlFor="category" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Kategori</label>
               <select id="category" name="category" defaultValue={post.category} className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0">
                 <option>Mevzuat</option><option>Teknik</option><option>Sürdürülebilirlik</option><option>Finans</option>
@@ -38,6 +43,9 @@ export default async function EditBlogPostPage({ params }: Props) {
             <div>
               <label htmlFor="readTime" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Okuma Süresi</label>
               <input id="readTime" name="readTime" defaultValue={post.readTime} className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:border-solar-500 focus:ring-2 focus:ring-solar-500/20 focus:outline-none dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-0" />
+            </div>
+            <div className="sm:col-span-2">
+              <ImageUpload name="coverImage" label="Kapak Görseli" defaultValue={post.coverImage || ''} />
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="excerpt" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Özet</label>
