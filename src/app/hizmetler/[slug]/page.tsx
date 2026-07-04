@@ -1,6 +1,6 @@
 // ============================================================
 // GES SOLAR PRO — Service Detail Page
-// Dynamic route for each service
+// Dynamic route for each service — expanded with benefits, tech specs, related projects
 // ============================================================
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -8,96 +8,24 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import { serviceDetails, services } from '@/data/services';
 
-interface ServiceDetail {
-  slug: string;
-  hero: string;
-  title: string;
-  process: { step: string; title: string; desc: string }[];
-  faq: { q: string; a: string }[];
-  cta: string;
-}
-
-const services: Record<string, ServiceDetail> = {
-  'arazi-ges': {
-    slug: 'arazi-ges',
-    hero: 'Büyük Ölçekli Arazi Güneş Enerjisi Santrali Kurulumu',
-    title: 'Arazi GES Kurulumu',
-    process: [
-      { step: '01', title: 'Ön Fizibilite', desc: 'Arazi güneşlenme analizi, imar durumu, trafo merkezine uzaklık, arazi eğimi ve topografya değerlendirmesi.' },
-      { step: '02', title: 'Lisanslama', desc: 'EPDK ön lisans ve lisans başvurusu, ÇED raporu, arazi mülkiyet çözümlemesi, TEDAŞ bağlantı görüşü.' },
-      { step: '03', title: 'Mühendislik', desc: 'Detaylı elektrik tasarımı, PVsyst simülasyonu, panel yerleşim planı, inverter seçimi, iletim hattı tasarımı.' },
-      { step: '04', title: 'İnşaat & Montaj', desc: 'Arazi hazırlığı, konstrüksiyon montajı, panel montajı, inverter ve trafo kurulumu, iletim hattı inşaatı.' },
-      { step: '05', title: 'Devreye Alma', desc: 'Sistem testleri, kabul testleri, TEDAŞ geçici kabulü, şebekeye bağlantı, enerji üretimine başlangıç.' },
-      { step: '06', title: 'İşletme & Bakım', desc: '7/24 uzaktan izleme, periyodik bakım, panel temizliği, performans raporlaması, 5 yıl garanti.' },
-    ],
-    faq: [
-      { q: '1 MW arazi GES için ne kadar alan gerekir?', a: 'Yaklaşık 15.000 — 20.000 m² (1.5 — 2 hektar) düz veya güney yönelimli arazi gereklidir.' },
-      { q: 'Lisans süreci ne kadar sürer?', a: 'EPDK lisans süreci ortalama 12-18 ay arasındadır. Ön lisans aşaması 6-8 ay, lisans aşaması 6-10 ay sürmektedir.' },
-      { q: 'Yatırım geri dönüş süresi nedir?', a: 'Türkiye güneşlenme değerleriyle ortalama 4-6 yıl arasında yatırım geri dönüşü sağlanmaktadır. YEKDEM desteği ile bu süre 3-4 yıla düşebilir.' },
-    ],
-    cta: 'Arazi GES projeniz için ücretsiz ön fizibilite raporu alın.',
-  },
-  'cati-ges': {
-    slug: 'cati-ges',
-    hero: 'Endüstriyel & Ticari Çatı Güneş Enerjisi Sistemleri',
-    title: 'Çatı GES Kurulumu',
-    process: [
-      { step: '01', title: 'Çatı Analizi', desc: 'Çatı statik dayanım testi, gölgeleme analizi, çatı ömrü değerlendirmesi, mevcut elektrik altyapı incelemesi.' },
-      { step: '02', title: 'Sistem Tasarımı', desc: 'PVsyst ile üretim simülasyonu, panel yerleşim optimizasyonu, inverter ve ekipman seçimi, elektrik projesi.' },
-      { step: '03', title: 'İzinler', desc: 'OSB/belediye yapı ruhsatı, TEDAŞ bağlantı anlaşması, çift yönlü sayaç başvurusu, mahsuplaşma sözleşmesi.' },
-      { step: '04', title: 'Kurulum', desc: 'Konstrüksiyon montajı, panel montajı, inverter ve pano kurulumu, kablolama, topraklama, paratoner.' },
-      { step: '05', title: 'Devreye Alma', desc: 'Sistem testleri, TEDAŞ geçici kabulü, çift yönlü sayaç takılması, enerji üretimine başlangıç.' },
-      { step: '06', title: 'İzleme & Bakım', desc: 'Online izleme paneli, aylık üretim raporu, periyodik bakım, panel temizliği, arıza müdahalesi.' },
-    ],
-    faq: [
-      { q: 'Çatım GES için uygun mu?', a: 'Çatınızın güney yönüne bakması, gölge almaması ve statik olarak panel yükünü taşıyabilmesi gerekir. Ücretsiz keşifle değerlendiriyoruz.' },
-      { q: 'Çatı GES için ne kadar yatırım gerekir?', a: '1 kW kurulu güç için yaklaşık 500-700 USD arası yatırım gerekmektedir. 500 kW\'lık bir sistem için yaklaşık 250.000-350.000 USD bütçe ayrılmalıdır.' },
-      { q: 'Fazla enerjiyi satabilir miyim?', a: 'Evet, mahsuplaşma sistemi ile ürettiğiniz fazla enerjiyi şebekeye satabilirsiniz. Çift yönlü sayaç ile tüketiminizden fazlası devlet garantili fiyattan satın alınır.' },
-    ],
-    cta: 'Çatınızın güneş enerjisi potansiyelini ücretsiz öğrenin.',
-  },
-  'enerji-danismanligi': {
-    slug: 'enerji-danismanligi',
-    hero: 'Güneş Enerjisi Yatırım Danışmanlığı',
-    title: 'Enerji Danışmanlığı',
-    process: [
-      { step: '01', title: 'Keşif Ziyareti', desc: 'Ücretsiz saha ziyareti, tesis/arazi incelemesi, elektrik tüketim analizi, ilk değerlendirme toplantısı.' },
-      { step: '02', title: 'Veri Analizi', desc: 'Son 12 aylık elektrik faturaları analizi, tüketim profilinin çıkarılması, güneşlenme verileriyle eşleştirme.' },
-      { step: '03', title: 'Fizibilite Raporu', desc: 'Tekno-ekonomik fizibilite raporu, yatırım tutarı hesaplaması, geri dönüş süresi, NBD ve İKO analizi.' },
-      { step: '04', title: 'Sistem Tasarımı', desc: 'Optimal sistem boyutlandırması, ekipman seçimi, teknik şartname hazırlanması, teşvik başvuru danışmanlığı.' },
-      { step: '05', title: 'Finansman', desc: 'Banka kredisi, leasing, YEKDEM, KOSGEB ve TÜBİTAK destekleri için başvuru danışmanlığı.' },
-      { step: '06', title: 'Karar Destek', desc: 'Tüm veriler ışığında yatırım kararı için yönetim kurulu sunumu ve detaylı maliyet-fayda analizi.' },
-    ],
-    faq: [
-      { q: 'Danışmanlık ücreti ne kadar?', a: 'İlk keşif ve ön değerlendirme ücretsizdir. Detaylı fizibilite raporu için proje büyüklüğüne göre fiyatlandırma yapılır.' },
-      { q: 'Fizibilite raporu ne kadar sürede hazırlanır?', a: 'Saha ziyareti sonrası 2-3 hafta içinde detaylı fizibilite raporunuz hazır olur.' },
-    ],
-    cta: 'Ücretsiz keşif randevusu için hemen ulaşın.',
-  },
-  'bakim-izleme': {
-    slug: 'bakim-izleme',
-    hero: 'GES Bakım & 7/24 Uzaktan İzleme Hizmeti',
-    title: 'Bakım & İzleme',
-    process: [
-      { step: '01', title: 'Sistem Denetimi', desc: 'Mevcut GES sisteminizin detaylı denetimi, panel verimlilik testi, inverter kontrolü, termal kamera taraması.' },
-      { step: '02', title: 'İzleme Kurulumu', desc: '7/24 uzaktan izleme sistemi kurulumu, sensör yerleşimi, veri toplama altyapısı, müşteri panosu erişimi.' },
-      { step: '03', title: 'Periyodik Bakım', desc: 'Aylık/üç aylık periyodik saha bakım ziyaretleri, ekipman kontrolleri, bağlantı sıkma, temizlik.' },
-      { step: '04', title: 'Panel Temizliği', desc: 'Robotik veya manuel panel temizliği, su ve kimyasal kullanmadan çevre dostu temizlik yöntemleri.' },
-      { step: '05', title: 'Performans Raporu', desc: 'Aylık enerji üretim raporu, verimlilik analizi, kayıp-kaçak tespiti, iyileştirme önerileri.' },
-      { step: '06', title: 'Arıza Müdahale', desc: 'Anlık alarm bildirimi, uzaktan arıza teşhisi, 48 saat içinde saha müdahalesi, yedek parça stoğu.' },
-    ],
-    faq: [
-      { q: 'Bakım sözleşmesi ne kadar?', a: 'Sistem büyüklüğüne göre yıllık kW başına fiyatlandırma yapılır. Ortalama 10-15 USD/kW/yıl arasıdır.' },
-      { q: 'İzleme sistemini kendi telefonumdan görebilir miyim?', a: 'Evet, mobil uygulama ve web paneli üzerinden anlık üretim, tüketim, kazanç ve karbon tasarrufu verilerinizi görebilirsiniz.' },
-    ],
-    cta: 'Mevcut sisteminizin verimliliğini artırmak için bize ulaşın.',
-  },
+// Reuse project data pattern from the projects page for related projects
+const allProjects: Record<string, { title: string; capacity: string; location: string; area: string; year: string; category: string }> = {
+  'konya-karatay-ges': { title: 'Konya Karatay GES', capacity: '25 MW', location: 'Konya', area: '350.000 m²', year: '2024', category: 'Arazi GES' },
+  'izmir-osb-cati-ges': { title: 'İzmir OSB Çatı GES', capacity: '4.2 MW', location: 'İzmir', area: '45.000 m²', year: '2024', category: 'Çatı GES' },
+  'ankara-lojistik-ges': { title: 'Ankara Lojistik Merkezi', capacity: '8 MW', location: 'Ankara', area: '120.000 m²', year: '2023', category: 'Arazi GES' },
+  'bursa-tekstil-ges': { title: 'Bursa Tekstil Fabrikası', capacity: '3.5 MW', location: 'Bursa', area: '38.000 m²', year: '2023', category: 'Çatı GES' },
+  'antalya-sera-ges': { title: 'Antalya Sera GES', capacity: '12 MW', location: 'Antalya', area: '180.000 m²', year: '2024', category: 'Arazi GES' },
+  'gaziantep-fabrika-ges': { title: 'Gaziantep Fabrika', capacity: '2.8 MW', location: 'Gaziantep', area: '30.000 m²', year: '2023', category: 'Çatı GES' },
+  'tekirdag-depolama-ges': { title: 'Tekirdağ Depolama', capacity: '5.5 MW', location: 'Tekirdağ', area: '80.000 m²', year: '2022', category: 'Arazi GES' },
+  'denizli-uretim-ges': { title: 'Denizli Üretim Tesisi', capacity: '1.8 MW', location: 'Denizli', area: '22.000 m²', year: '2022', category: 'Çatı GES' },
+  'eskisehir-sanayi-ges': { title: 'Eskişehir Sanayi', capacity: '6.2 MW', location: 'Eskişehir', area: '90.000 m²', year: '2024', category: 'Arazi GES' },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const service = services[slug];
+  const service = serviceDetails[slug];
   if (!service) return { title: 'Hizmet Bulunamadı' };
   return {
     title: service.title,
@@ -107,14 +35,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const service = services[slug];
+  const service = serviceDetails[slug];
   if (!service) notFound();
+
+  // Get the listing data for tech specs
+  const listing = services.find((s) => s.slug === slug);
 
   return (
     <>
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 py-24 pt-32 lg:py-32 lg:pt-40">
-        <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 py-24 pt-32 lg:py-32 lg:pt-40">
+        <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+            }}
+          />
+        </div>
+        <div className="relative mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
           <Link href="/hizmetler" className="inline-flex items-center gap-2 text-sm text-neutral-400 transition-colors hover:text-solar-400">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -127,8 +70,24 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         </div>
       </section>
 
-      {/* Process */}
+      {/* Benefits / Avantajlar */}
       <section className="py-[var(--section-lg)] bg-white dark:bg-neutral-900">
+        <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
+          <SectionHeading eyebrow="Avantajlar" title="Neden Bu Hizmet?" align="center" />
+          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {service.benefits.map((b) => (
+              <Card key={b.title} padding="lg" hover className="text-center group">
+                <div className="text-4xl">{b.icon}</div>
+                <h3 className="mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-0">{b.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">{b.desc}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="py-[var(--section-lg)] bg-neutral-50 dark:bg-neutral-950">
         <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
           <SectionHeading eyebrow="Süreç" title="Nasıl Çalışıyoruz?" align="center" />
           <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,6 +103,27 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </section>
+
+      {/* Technical Specs */}
+      {listing && listing.techSpecs.length > 0 && (
+        <section className="py-[var(--section-lg)] bg-white dark:bg-neutral-900">
+          <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
+            <SectionHeading eyebrow="Özellikler" title="Teknik Detaylar" align="center" />
+            <div className="mt-16 mx-auto max-w-3xl overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800">
+              <table className="w-full">
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  {listing.techSpecs.map((spec, i) => (
+                    <tr key={spec.label} className={i % 2 === 0 ? 'bg-white dark:bg-neutral-950' : 'bg-neutral-50/50 dark:bg-neutral-900/50'}>
+                      <td className="px-6 py-4 text-sm font-semibold text-neutral-700 dark:text-neutral-200 w-1/2">{spec.label}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">{spec.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* FAQ */}
       <section className="py-[var(--section-lg)] bg-neutral-50 dark:bg-neutral-950">
@@ -161,6 +141,87 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 <p className="px-6 pb-6 text-neutral-500 dark:text-neutral-400">{item.a}</p>
               </details>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related Projects */}
+      {service.relatedProjectSlugs.length > 0 && (
+        <section className="py-[var(--section-lg)] bg-white dark:bg-neutral-900">
+          <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
+            <SectionHeading eyebrow="Referanslar" title="Benzer Projelerimiz" align="center" />
+            <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {service.relatedProjectSlugs.map((projectSlug) => {
+                const project = allProjects[projectSlug];
+                if (!project) return null;
+                return (
+                  <Link
+                    key={projectSlug}
+                    href={`/projeler/${projectSlug}`}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-md transition-all duration-500 hover:shadow-xl hover:-translate-y-1 dark:border-neutral-800 dark:bg-neutral-900"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary-600 via-primary-800 to-primary-900">
+                      <div
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          backgroundImage:
+                            'linear-gradient(30deg, rgba(245,166,35,0.3) 1px, transparent 1px), linear-gradient(-30deg, rgba(245,166,35,0.3) 1px, transparent 1px)',
+                          backgroundSize: '30px 30px',
+                        }}
+                      />
+                      <span className="absolute left-4 top-4 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                        {project.category}
+                      </span>
+                      <span className="absolute right-4 top-4 rounded-full bg-solar-500 px-3 py-1 text-xs font-bold text-neutral-950 shadow-glow">
+                        {project.capacity}
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="text-lg font-semibold text-neutral-900 transition-colors group-hover:text-primary-600 dark:text-neutral-0">
+                        {project.title}
+                      </h3>
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+                        <span>{project.location}</span>
+                        <span>{project.area}</span>
+                        <span>{project.year}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="mt-10 text-center">
+              <Button href="/projeler" variant="outline" size="md">
+                Tüm Projeleri Gör
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Other Services Quick Links */}
+      <section className="py-[var(--section-lg)] bg-neutral-50 dark:bg-neutral-950">
+        <div className="mx-auto max-w-[var(--container-max)] px-6 lg:px-12">
+          <SectionHeading eyebrow="Diğer Hizmetler" title="Bunlar da İlginizi Çekebilir" align="center" />
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {services
+              .filter((s) => s.slug !== slug)
+              .map((s) => (
+                <Link
+                  key={s.slug}
+                  href={`/hizmetler/${s.slug}`}
+                  className="group flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-5 transition-all hover:border-solar-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-solar-600"
+                >
+                  <span className="text-3xl">{s.icon}</span>
+                  <div>
+                    <h3 className="font-semibold text-neutral-900 group-hover:text-primary-600 dark:text-neutral-0">{s.title}</h3>
+                    <p className="text-xs text-neutral-400">{s.capacity}</p>
+                  </div>
+                  <svg className="ml-auto h-5 w-5 shrink-0 text-neutral-300 transition-transform group-hover:translate-x-1 group-hover:text-solar-500 dark:text-neutral-600" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              ))}
           </div>
         </div>
       </section>

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { footerNav } from '@/config/navigation';
 import { defaultSiteConfig } from '@/config/site.config';
 
+const currentYear = new Date().getFullYear();
+
 export function Footer() {
   const config = defaultSiteConfig;
 
@@ -113,7 +115,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-neutral-200 pt-8 sm:flex-row dark:border-neutral-800">
           <p className="text-xs text-neutral-400 dark:text-neutral-500">
-            &copy; {new Date().getFullYear()} {config.name}. Tüm hakları saklıdır.
+            &copy; {currentYear} {config.name}. Tüm hakları saklıdır.
           </p>
           <a href="mailto:info@aifactory.com.tr" className="text-xs text-neutral-400 transition-colors hover:text-primary-600 dark:text-neutral-500 dark:hover:text-solar-400">
             Powered by <span className="font-semibold text-neutral-500 dark:text-neutral-300">Aİ Factory</span>

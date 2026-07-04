@@ -5,15 +5,53 @@
 // Premium hero with animated solar panel visual,
 // gradient overlay, stats strip, and dual CTA
 // ============================================================
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSiteConfig } from '@/components/layout/providers';
 import { Counter } from '@/components/animations/counter';
+
+// Seeded pseudo-random number generator (LCG) — ensures server & client produce identical values
+function createSeededRandom(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state * 1664525 + 1013904223) & 0xffffffff;
+    return (state >>> 0) / 0xffffffff;
+  };
+}
+
+interface Particle {
+  key: number;
+  left: string;
+  top: string;
+  duration: string;
+  delay: string;
+  tx: string;
+  ty: string;
+}
+
+function generateParticles(count: number): Particle[] {
+  const rng = createSeededRandom(42);
+  return Array.from({ length: count }, (_, i) => {
+    const tx = ((rng() - 0.5) * 200).toFixed(0);
+    const ty = (-rng() * 300).toFixed(0);
+    return {
+      key: i,
+      left: `${(rng() * 100).toFixed(1)}%`,
+      top: `${(rng() * 100).toFixed(1)}%`,
+      duration: `${(3 + rng() * 5).toFixed(1)}s`,
+      delay: `${(rng() * 5).toFixed(1)}s`,
+      tx: `${tx}px`,
+      ty: `${ty}px`,
+    };
+  });
+}
 
 export function Hero() {
   const config = useSiteConfig();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const particles = useMemo(() => generateParticles(20), []);
 
   useEffect(() => {
     setIsVisible(true);
@@ -55,26 +93,22 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      {/* Animated particles */}
+      {/* Animated particles — generated deterministically to avoid hydration mismatch */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {Array.from({ length: 20 }).map((_, i) => {
-          const tx = ((Math.random() - 0.5) * 200).toFixed(0);
-          const ty = (-Math.random() * 300).toFixed(0);
-          return (
-            <div
-              key={i}
-              className="absolute h-0.5 w-0.5 rounded-full bg-solar-400/40"
-              style={{
-                left: `${(Math.random() * 100).toFixed(1)}%`,
-                top: `${(Math.random() * 100).toFixed(1)}%`,
-                animation: `particle-drift ${(3 + Math.random() * 5).toFixed(1)}s ease-in-out infinite`,
-                animationDelay: `${(Math.random() * 5).toFixed(1)}s`,
-                '--tx': `${tx}px`,
-                '--ty': `${ty}px`,
-              } as React.CSSProperties}
-            />
-          );
-        })}
+        {particles.map((p) => (
+          <div
+            key={p.key}
+            className="absolute h-0.5 w-0.5 rounded-full bg-solar-400/40"
+            style={{
+              left: p.left,
+              top: p.top,
+              animation: `particle-drift ${p.duration} ease-in-out infinite`,
+              animationDelay: p.delay,
+              '--tx': p.tx,
+              '--ty': p.ty,
+            } as React.CSSProperties}
+          />
+        ))}
       </div>
 
       {/* Content */}
